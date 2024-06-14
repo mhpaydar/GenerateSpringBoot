@@ -4,19 +4,19 @@ import java.util.Arrays;
 
 /**
  * @author m.h paydar
- * @date 6/14/2024 5:04 PM
+ * @date 6/14/2024 9:20 PM
  * @linkedin https://www.linkedin.com/in/m-hossein-paydar
  * @github https://github.com/mhpaydar
  * @copyright
  */
-public enum DbType {
-    ORACLE(1, "oracle"),
-    MYSQL(2, "mysql");
+public enum SequenceType {
+    SEQUENCE(1, "SEQUENCE"),
+    IDENTITY(2, "IDENTITY");
 
     final int code;
     final String value;
 
-    DbType(final int code, final String value) {
+    SequenceType(final int code, final String value) {
         this.code = code;
         this.value = value;
     }
@@ -29,9 +29,9 @@ public enum DbType {
         return this.value;
     }
 
-    public static DbType of(final String value) {
+    public static SequenceType of(final String value) {
         return Arrays.stream(values())
                 .filter(x -> x.value.equalsIgnoreCase(value))
-                .findFirst().orElse(DbType.ORACLE);
+                .findFirst().orElse(SequenceType.SEQUENCE);
     }
 }

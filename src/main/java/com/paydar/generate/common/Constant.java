@@ -9,4 +9,5 @@ package com.paydar.generate.common;
  */
 public class Constant {
     public static final String USER_REG_FIELD = "fk_user_reg_id";
+    public static final String REPLACE_TABLE_PATTERN = "TBL_";
 }

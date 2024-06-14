@@ -1,5 +1,8 @@
 package com.paydar.generate.model;
 
+import com.paydar.generate.common.Utils;
+import com.paydar.generate.enums.JavaType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +112,7 @@ public class IndexData implements Serializable {
             if (!this.cols.isEmpty()) {
                 for (ColumnData d : this.cols) {
                     if (d.getParent() == 0) {
-                        if (d.getColJavaType().contains("Date")) {
+                        if (d.getColJavaType().equals(JavaType.DATE)) {
                             //sbjava.append("\n\t@Column(name = \"" + d.getColName() + "\" " + readOnlyStr + " , columnDefinition = \"" + d.getColType() + "\")\n");
                         } else {
                             sb.append("And" + d.getColNameNet());
@@ -118,19 +121,19 @@ public class IndexData implements Serializable {
                             sbe.append("&& @.get"+d.getColNameNet()+"().equals(#.get" + d.getColNameNet()+"())");
                         }
                     } else {
-                        String ref1 = "";
+
                         String mapped = "";
                         if (d.getIsDuplicate() == 0) {
-                            mapped = Utils.getColName(d.getParentTable().replaceAll("TBL_", ""));
+                            mapped = Utils.getColName(d.getParentTableJava());
                         } else {
-                            mapped = Utils.getColNameParent(d.getParentTable().replaceAll("TBL_", ""), d.getColName());
+                            mapped = Utils.getColNameParent(d.getParentTableJava(), d.getColName());
                         }
-                        String cftp = Utils.getClassName(d.getParentTable());
+
                         String cfnnp = "";
                         if (d.getIsDuplicate() == 0) {
-                            cfnnp = Utils.getColName_NET(d.getParentTable().replaceAll("TBL_", ""));
+                            cfnnp = Utils.getColName_NET(d.getParentTableJava());
                         } else {
-                            cfnnp = Utils.getColNameParent_NET(d.getParentTable().replaceAll("TBL_", ""), d.getColName());
+                            cfnnp = Utils.getColNameParent_NET(d.getParentTableJava(), d.getColName());
                         }
                         sb.append("And" + cfnnp + "Id");
                         sbp.append(",final Long " + mapped + "Id");

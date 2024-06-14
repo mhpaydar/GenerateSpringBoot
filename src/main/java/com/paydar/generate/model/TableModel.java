@@ -4,6 +4,8 @@ import com.paydar.generate.common.Constant;
 import com.paydar.generate.common.Utils;
 import com.paydar.generate.enums.ColumnDBType;
 import com.paydar.generate.enums.DbType;
+import com.paydar.generate.enums.JavaType;
+import com.paydar.generate.enums.SequenceType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,14 +24,15 @@ public class TableModel  implements Serializable {
     private String tableName;
     private String clazzName;
     private String tableColName;
-    private String pkName;
-    private String pkType;
-    private String pkExtra;
-    private String pkComment;
-    private String pkColumnName;
-    private String pkColumnType;
-    private String pkColumnNameNet;
-    private String sequenceType;
+    private ColumnData pkColumn;
+//    private String pkName;
+//    private JavaType pkType;
+//    private String pkExtra;
+//    private String pkComment;
+//    private String pkColumnName;
+//    private ColumnDBType pkColumnType;
+//    private String pkColumnNameNet;
+    private SequenceType sequenceType;
     private String sequenceName;
     private List<ColumnData> lstColumnData;
     private boolean isUserLog;
@@ -65,19 +68,19 @@ public class TableModel  implements Serializable {
                     for (IndexData inxd : this.lstIndexData) {
                         if (!inxd.getNonUnique()) {
                             if (inxd.getData().toUpperCase().equals(colData.getColName().toUpperCase())) {
-                                colData.setColUnique("1");
+                                colData.setColUnique(true);
                                 inxd.addCols(colData);
                             }
                         }
                     }
                 }
                 for (IndexData inxd : this.lstIndexData) {
-                    if (inxd.getNonUnique().equals("0")) {
+                    if (!inxd.getNonUnique()) {
                         if (inxd.getData().indexOf(",")>0){
                             String[] split = inxd.getData().split(",");
                             for (String s:split) {
-                                for (ColumnDBType colData : lstColumnData) {
-                                    if (s.toUpperCase().equals(colData.getColName().toUpperCase())) {
+                                for (ColumnData colData : lstColumnData) {
+                                    if (s.equalsIgnoreCase(colData.getColName())) {
                                         inxd.addCols(colData);
                                     }
                                 }
@@ -89,16 +92,16 @@ public class TableModel  implements Serializable {
             }
         }
 
-        if (this.pkExtra != null) {
-            if (this.pkExtra.toLowerCase().indexOf("increment") > 0) {
-                this.sequenceType = "IDENTITY";
+        if (this.pkColumn.getExtraInfo() != null) {
+            if (this.pkColumn.getExtraInfo().toLowerCase().indexOf("increment") > 0) {
+                this.sequenceType = SequenceType.IDENTITY;
                 this.sequenceName = "";
             } else {
-                this.sequenceType = "SEQUENCE";
+                this.sequenceType = SequenceType.SEQUENCE;
                 this.sequenceName = getTableName().replaceAll("TBL", "SEQ");
             }
         } else {
-            this.sequenceType = "SEQUENCE";
+            this.sequenceType = SequenceType.SEQUENCE;
             this.sequenceName = getTableName().replaceAll("TBL", "SEQ");
         }
 
@@ -144,69 +147,69 @@ public class TableModel  implements Serializable {
         this.clazzName = clazzName;
     }
 
-    public String getPkName() {
-        return pkName;
-    }
+//    public String getPkName() {
+//        return pkName;
+//    }
+//
+//    public void setPkName(String pkName) {
+//        this.pkName = pkName;
+//        this.pkColumnName = Utils.getColName(pkName);
+//        this.pkColumnNameNet = Utils.getColName_NET(pkName);
+//    }
 
-    public void setPkName(String pkName) {
-        this.pkName = pkName;
-        this.pkColumnName = Utils.getColName(pkName);
-        this.pkColumnNameNet = Utils.getColName_NET(pkName);
-    }
+//    public String getPkComment() {
+//        return pkComment;
+//    }
+//
+//    public void setPkComment(String pkComment) {
+//        this.pkComment = pkComment;
+//    }
+//
+//    public String getPkColumnName() {
+//        return pkColumnName;
+//    }
 
-    public String getPkComment() {
-        return pkComment;
-    }
+//    public void setPkColumnName(String pkColumnName) {
+//        this.pkColumnName = pkColumnName;
+//    }
 
-    public void setPkComment(String pkComment) {
-        this.pkComment = pkComment;
-    }
+//    public ColumnDBType getPkColumnType() {
+//        return pkColumnType;
+//    }
+//
+//    public void setPkColumnType(String pkColumnType) {
+//        this.pkColumnType = ColumnDBType.of(pkColumnType);
+//    }
+//
+//    public String getPkColumnNameNet() {
+//        return pkColumnNameNet;
+//    }
 
-    public String getPkColumnName() {
-        return pkColumnName;
-    }
+//    public void setPkColumnNameNet(String pkColumnNameNet) {
+//        this.pkColumnNameNet = pkColumnNameNet;
+//    }
 
-    public void setPkColumnName(String pkColumnName) {
-        this.pkColumnName = pkColumnName;
-    }
-
-    public String getPkColumnType() {
-        return pkColumnType;
-    }
-
-    public void setPkColumnType(String pkColumnType) {
-        this.pkColumnType = pkColumnType;
-    }
-
-    public String getPkColumnNameNet() {
-        return pkColumnNameNet;
-    }
-
-    public void setPkColumnNameNet(String pkColumnNameNet) {
-        this.pkColumnNameNet = pkColumnNameNet;
-    }
-
-    public String getSequenceType() {
+    public SequenceType getSequenceType() {
         return sequenceType;
     }
 
-    public void setSequenceType(String pkSequenceType) {
-        this.sequenceType = pkSequenceType;
-    }
+//    public void setSequenceType(String pkSequenceType) {
+//        this.sequenceType = SequenceType.of(sequenceName);
+//    }
 
     public String getSequenceName() {
         return sequenceName;
     }
 
-    public void setSequenceName(String pkSequenceName) {
-        this.sequenceName = pkSequenceName;
-    }
+//    public void setSequenceName(String pkSequenceName) {
+//        this.sequenceName = pkSequenceName;
+//    }
 
-    public List<ColumnData> getLstColDatas() {
+    public List<ColumnData> getLstColData() {
         return lstColumnData;
     }
 
-    public void setLstColDatas(List<ColumnData> lstColDatas) {
+    public void setLstColData(List<ColumnData> lstColDatas) {
         this.lstColumnData = lstColDatas;
     }
 
@@ -214,102 +217,102 @@ public class TableModel  implements Serializable {
         return dbType;
     }
 
-    public void setDbType(DbType dbType) {
-        this.dbType = dbType;
-    }
+//    public void setDbType(DbType dbType) {
+//        this.dbType = dbType;
+//    }
 
-    public String getPkType() {
-        return pkType;
-    }
-
-    public void setPkType(String pkType, String len, String scale) {
-        this.pkType = pkType.toUpperCase();
-        int l = Integer.parseInt(len);
-        int s = Integer.parseInt(scale);
-        if (this.dbType.equals(DbType.ORACLE)) {
-            if (pkType.equals("NUMBER")) {
-                if (l == 1) {
-                    this.pkColumnType = "Boolean";
-                } else if (l > 1 && l <= 9) {
-                    if (s == 0) {
-                        this.pkColumnType = "Integer";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                } else if (l > 9 && l <= 18) {
-                    if (s == 0) {
-                        this.pkColumnType = "Long";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                } else if (l > 19) {
-                    if (s == 0) {
-                        this.pkColumnType = "Long";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                }
-            } else if (pkType.equals("INTEGER")) {
-                this.pkColumnType = "Integer";
-            } else if (pkType.equals("VARCHAR2")) {
-                this.pkColumnType = "String";
-            } else if (pkType.equals("NVARCHAR2")) {
-                this.pkColumnType = "String";
-            } else if (pkType.equals("DATE")) {
-                this.pkColumnType = "LocalDateTime";
-            } else if (pkType.equals("CHAR")) {
-                this.pkColumnType = "String";
-            } else if (pkType.equals("FLOAT")) {
-                this.pkColumnType = "xx";
-            } else if (pkType.equals("TIMESTAMP")) {
-                this.pkColumnType = "LocalDateTime";
-            } else {
-                this.pkColumnType = "yy";
-            }
-        } else if (this.dbType.equals("mysql")) {
-            if (pkType.equals("DECIMAL")) {
-                if (l == 1) {
-                    this.pkColumnType = "Boolean";
-                } else if (l > 1 && l <= 9) {
-                    if (s == 0) {
-                        this.pkColumnType = "Integer";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                } else if (l > 9 && l <= 20) {
-                    if (s == 0) {
-                        this.pkColumnType = "Long";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                } else if (l > 20) {
-                    if (s == 0) {
-                        this.pkColumnType = "Long";
-                    } else {
-                        this.pkColumnType = "Double";
-                    }
-                }
-            } else if (pkType.equals("INT")) {
-                this.pkColumnType = "Long";
-            } else if (pkType.equals("BIGINT")) {
-                this.pkColumnType = "Long";
-            } else if (pkType.equals("VARCHAR")) {
-                this.pkColumnType = "String";
-            } else if (pkType.equals("SMALLINT")) {
-                if (l == 1) {
-                    this.pkColumnType = "Boolean";
-                } else {
-                    this.pkColumnType = "Integer";
-                }
-            } else if (pkType.equals("DATE")) {
-                this.pkColumnType = "LocalDateTime";
-            } else if (pkType.equals("DATETIME")) {
-                this.pkColumnType = "LocalDateTime";
-            } else {
-                this.pkColumnType = "yy";
-            }
-        }
-    }
+//    public JavaType getPkType() {
+//        return pkType;
+//    }
+//
+//    public void setPkType(String pkType, String len, String scale) {
+//        this.pkType = pkType.toUpperCase();
+//        int l = Integer.parseInt(len);
+//        int s = Integer.parseInt(scale);
+//        if (this.dbType.equals(DbType.ORACLE)) {
+//            if (pkType.equals("NUMBER")) {
+//                if (l == 1) {
+//                    this.pkColumnType = "Boolean";
+//                } else if (l > 1 && l <= 9) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Integer";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                } else if (l > 9 && l <= 18) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Long";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                } else if (l > 19) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Long";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                }
+//            } else if (pkType.equals("INTEGER")) {
+//                this.pkColumnType = "Integer";
+//            } else if (pkType.equals("VARCHAR2")) {
+//                this.pkColumnType = "String";
+//            } else if (pkType.equals("NVARCHAR2")) {
+//                this.pkColumnType = "String";
+//            } else if (pkType.equals("DATE")) {
+//                this.pkColumnType = "LocalDateTime";
+//            } else if (pkType.equals("CHAR")) {
+//                this.pkColumnType = "String";
+//            } else if (pkType.equals("FLOAT")) {
+//                this.pkColumnType = "xx";
+//            } else if (pkType.equals("TIMESTAMP")) {
+//                this.pkColumnType = "LocalDateTime";
+//            } else {
+//                this.pkColumnType = "yy";
+//            }
+//        } else if (this.dbType.equals("mysql")) {
+//            if (pkType.equals("DECIMAL")) {
+//                if (l == 1) {
+//                    this.pkColumnType = "Boolean";
+//                } else if (l > 1 && l <= 9) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Integer";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                } else if (l > 9 && l <= 20) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Long";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                } else if (l > 20) {
+//                    if (s == 0) {
+//                        this.pkColumnType = "Long";
+//                    } else {
+//                        this.pkColumnType = "Double";
+//                    }
+//                }
+//            } else if (pkType.equals("INT")) {
+//                this.pkColumnType = "Long";
+//            } else if (pkType.equals("BIGINT")) {
+//                this.pkColumnType = "Long";
+//            } else if (pkType.equals("VARCHAR")) {
+//                this.pkColumnType = "String";
+//            } else if (pkType.equals("SMALLINT")) {
+//                if (l == 1) {
+//                    this.pkColumnType = "Boolean";
+//                } else {
+//                    this.pkColumnType = "Integer";
+//                }
+//            } else if (pkType.equals("DATE")) {
+//                this.pkColumnType = "LocalDateTime";
+//            } else if (pkType.equals("DATETIME")) {
+//                this.pkColumnType = "LocalDateTime";
+//            } else {
+//                this.pkColumnType = "yy";
+//            }
+//        }
+//    }
 
     public boolean isIsUserLog() {
         return isUserLog;
@@ -319,13 +322,13 @@ public class TableModel  implements Serializable {
         this.isUserLog = isUserLog;
     }
 
-    public String getPkExtra() {
-        return pkExtra;
-    }
-
-    public void setPkExtra(String pkExtra) {
-        this.pkExtra = pkExtra;
-    }
+//    public String getPkExtra() {
+//        return pkExtra;
+//    }
+//
+//    public void setPkExtra(String pkExtra) {
+//        this.pkExtra = pkExtra;
+//    }
 
     public boolean isIsReadOnly() {
         return isReadOnly;
@@ -339,9 +342,9 @@ public class TableModel  implements Serializable {
         return tableColName;
     }
 
-    public void setTableColName(String tableColName) {
-        this.tableColName = tableColName;
-    }
+//    public void setTableColName(String tableColName) {
+//        this.tableColName = tableColName;
+//    }
 
     public List<IndexData> getLstIndexData() {
         return lstIndexData;
