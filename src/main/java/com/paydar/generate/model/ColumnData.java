@@ -58,7 +58,7 @@ public class ColumnData implements Serializable {
         try {
             int l = this.colLen;
             int s = this.colScale;
-            int n = dbType.equals(DbType.ORACLE) ? 18 : 20;
+            int n = dbType.equals(DbType.ORACLE) ? 22 : 20;
             if (colType.equals(ColumnDBType.NUMBER) || colType.equals(ColumnDBType.DECIMAL)) {
                 if (l == 1) {
                     if (s == 0) {
