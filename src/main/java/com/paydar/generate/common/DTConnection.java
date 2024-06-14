@@ -13,12 +13,15 @@ import java.sql.DriverManager;
  * @copyright
  */
 public class DTConnection {
+
     private final DbType dbType;
 
     public DTConnection(String dbType) {
         this.dbType = DbType.of(dbType);
     }
-
+    public DbType getDbType() {
+        return dbType;
+    }
     public Connection getConn(String data) {
         String[] arrData = data.split("\\|");
         if (dbType.equals(DbType.ORACLE)) {
@@ -73,7 +76,7 @@ public class DTConnection {
 
     public String getPkName(String schemaName, String tableName) {
         if (dbType.equals(DbType.ORACLE)) {
-            return    "select tc.COLUMN_ID,tc.COLUMN_NAME,tc.DATA_TYPE,nvl(tc.DATA_PRECISION, tc.DATA_LENGTH) as len,tc.NULLABLE,tc.DATA_DEFAULT,tc.TABLE_NAME,"
+            return    "select tc.COLUMN_ID,tc.COLUMN_NAME,tc.DATA_TYPE,nvl(decode(tc.CHAR_LENGTH,0,tc.DATA_LENGTH,tc.CHAR_LENGTH), tc.DATA_LENGTH)) as len,tc.NULLABLE,tc.DATA_DEFAULT,tc.TABLE_NAME,"
                     + "       (select cc.COMMENTS from all_col_comments cc where cc.OWNER = tc.owner and cc.TABLE_NAME = tc.TABLE_NAME and cc.COLUMN_NAME = tc.COLUMN_NAME) as comm,"
                     + "       'yy' as java_type,decode(tc.nullable, 'N', 0, 1) as java_null,nvl(tc.DATA_SCALE, 0) as scale,'' as extra "
                     + "from all_tab_cols tc "
@@ -83,6 +86,24 @@ public class DTConnection {
         } else if (dbType.equals(DbType.MYSQL)) {
             return "select 0 as COLUMN_ID,COLUMN_NAME,DATA_TYPE,coalesce(NUMERIC_PRECISION,character_maximum_length) as len,is_nullable as NULLABLE,column_DEFAULT as DATA_DEFAULT,TABLE_NAME,column_comment as comm,'yy' as java_type , if(is_nullable='NO','0','1') as java_null,coalesce(t.numeric_scale, 0) as scale,t.extra "
                     + "from INFORMATION_SCHEMA.COLUMNS t where upper(table_schema)='" + schemaName.toUpperCase() + "' and upper(table_name)='" + tableName.toUpperCase() + "' and column_key='PRI'";
+        } else {
+            return null;
+        }
+    }
+
+    public String getFieldNames(String schemaName, String tableName, String pkName) {
+        if (dbType.equals(DbType.ORACLE)) {
+            return    "select tc.COLUMN_ID,tc.COLUMN_NAME,tc.DATA_TYPE,nvl(decode(tc.CHAR_LENGTH,0,tc.DATA_LENGTH,tc.CHAR_LENGTH), tc.DATA_LENGTH)) as len,tc.NULLABLE,tc.DATA_DEFAULT,tc.TABLE_NAME,"
+                    + "       (select cc.COMMENTS from all_col_comments cc where cc.OWNER = tc.owner and cc.TABLE_NAME = tc.TABLE_NAME and cc.COLUMN_NAME = tc.COLUMN_NAME) as comm,"
+                    + "       'yy' as java_type,decode(tc.nullable, 'N', 0, 1) as java_null,nvl(tc.DATA_SCALE, 0) as scale,'' as extra "
+                    + "from all_tab_cols tc "
+                    + "where   tc.owner = '" + schemaName.toUpperCase() + "' and tc.table_name = '" + tableName.toUpperCase() + "'"
+                    + "        and upper(tc.COLUMN_NAME) <> upper('" + pkName + "')"
+                    +"         and tc.HIDDEN_COLUMN='NO' and tc.VIRTUAL_COLUMN='NO'"
+                    +"order by tc.table_name,tc.COLUMN_NAME";
+        } else if (dbType.equals(DbType.MYSQL)) {
+            return "select 0 as COLUMN_ID,COLUMN_NAME,DATA_TYPE,coalesce(NUMERIC_PRECISION,character_maximum_length) as len,is_nullable as NULLABLE,column_DEFAULT as DATA_DEFAULT,TABLE_NAME,column_comment as comm,'yy' as java_type , if(is_nullable='NO','0','1') as java_null,coalesce(t.numeric_scale, 0) as scale "
+                    + "from INFORMATION_SCHEMA.COLUMNS t where upper(table_schema)='" + schemaName.toUpperCase() + "' and upper(table_name)='" + tableName.toUpperCase() + "' and column_key!='PRI' order by TABLE_NAME,COLUMN_NAME";
         } else {
             return null;
         }

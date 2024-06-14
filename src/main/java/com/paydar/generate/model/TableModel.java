@@ -18,14 +18,14 @@ import java.util.List;
  * @github https://github.com/mhpaydar
  * @copyright
  */
-public class TableModel  implements Serializable {
-    private DbType dbType;
+public class TableModel implements Serializable {
+    //    private DbType dbType;
     private String ownerName;
     private String tableName;
     private String clazzName;
     private String tableColName;
     private ColumnData pkColumn;
-//    private String pkName;
+    //    private String pkName;
 //    private JavaType pkType;
 //    private String pkExtra;
 //    private String pkComment;
@@ -76,9 +76,9 @@ public class TableModel  implements Serializable {
                 }
                 for (IndexData inxd : this.lstIndexData) {
                     if (!inxd.getNonUnique()) {
-                        if (inxd.getData().indexOf(",")>0){
+                        if (inxd.getData().indexOf(",") > 0) {
                             String[] split = inxd.getData().split(",");
-                            for (String s:split) {
+                            for (String s : split) {
                                 for (ColumnData colData : lstColumnData) {
                                     if (s.equalsIgnoreCase(colData.getColName())) {
                                         inxd.addCols(colData);
@@ -143,9 +143,9 @@ public class TableModel  implements Serializable {
         return clazzName;
     }
 
-    public void setClazzName(String clazzName) {
-        this.clazzName = clazzName;
-    }
+//    public void setClazzName(String clazzName) {
+//        this.clazzName = clazzName;
+//    }
 
 //    public String getPkName() {
 //        return pkName;
@@ -164,10 +164,10 @@ public class TableModel  implements Serializable {
 //    public void setPkComment(String pkComment) {
 //        this.pkComment = pkComment;
 //    }
-//
-//    public String getPkColumnName() {
-//        return pkColumnName;
-//    }
+
+    public String getPkColumnName() {
+        return this.pkColumn!=null?this.pkColumn.getColName():"";
+    }
 
 //    public void setPkColumnName(String pkColumnName) {
 //        this.pkColumnName = pkColumnName;
@@ -213,9 +213,9 @@ public class TableModel  implements Serializable {
         this.lstColumnData = lstColDatas;
     }
 
-    public DbType getDbType() {
-        return dbType;
-    }
+//    public DbType getDbType() {
+//        return dbType;
+//    }
 
 //    public void setDbType(DbType dbType) {
 //        this.dbType = dbType;
@@ -353,4 +353,13 @@ public class TableModel  implements Serializable {
     public void setLstIndexData(List<IndexData> lstIndexDatas) {
         this.lstIndexData = lstIndexDatas;
     }
+
+    public ColumnData getPkColumn() {
+        return pkColumn;
+    }
+
+    public void setPkColumn(ColumnData pkColumn) {
+        this.pkColumn = pkColumn;
+    }
+
 }
