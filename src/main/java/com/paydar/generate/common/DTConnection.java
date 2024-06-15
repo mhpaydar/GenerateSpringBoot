@@ -81,7 +81,7 @@ public class DTConnection {
                     + "       'yy' as java_type,decode(tc.nullable, 'N', 0, 1) as java_null,nvl(tc.DATA_SCALE, 0) as scale,'' as extra "
                     + "from all_tab_cols tc "
                     + "where   tc.owner = '" + schemaName.toUpperCase() + "' and tc.table_name = '" + tableName.toUpperCase() + "' and tc.COLUMN_NAME in "
-                    + "        (select ic.COLUMN_NAME from all_constraints c,all_indexes i,all_ind_columns ic where c.OWNER = '" + schemaName.toUpperCase() + "' and i.TABLE_NAME = '" + tableName.toUpperCase() + "' and c.CONSTRAINT_TYPE = 'P' and c.INDEX_OWNER = i.OWNER and c.INDEX_NAME = i.INDEX_NAME and i.OWNER = ic.INDEX_OWNER and i.INDEX_NAME = ic.INDEX_NAME)"
+                    + "        (select ic.COLUMN_NAME from all_constraints c,all_indexes i,all_ind_columns ic where i.TABLE_OWNER = '" + schemaName.toUpperCase() + "' and i.TABLE_NAME = '" + tableName.toUpperCase() + "' and c.TABLE_NAME=i.TABLE_NAME and c.CONSTRAINT_TYPE = 'P' and c.INDEX_OWNER = i.OWNER and c.INDEX_NAME = i.INDEX_NAME and i.OWNER = ic.INDEX_OWNER and i.INDEX_NAME = ic.INDEX_NAME)"
                     +"         and tc.HIDDEN_COLUMN='NO' and tc.VIRTUAL_COLUMN='NO'";
         } else if (dbType.equals(DbType.MYSQL)) {
             return "select 0 as COLUMN_ID,COLUMN_NAME,DATA_TYPE,coalesce(NUMERIC_PRECISION,character_maximum_length) as len,is_nullable as NULLABLE,column_DEFAULT as DATA_DEFAULT,TABLE_NAME,column_comment as comm,'yy' as java_type , if(is_nullable='NO','0','1') as java_null,coalesce(t.numeric_scale, 0) as scale,t.extra "
@@ -104,6 +104,23 @@ public class DTConnection {
         } else if (dbType.equals(DbType.MYSQL)) {
             return "select 0 as COLUMN_ID,COLUMN_NAME,DATA_TYPE,coalesce(NUMERIC_PRECISION,character_maximum_length) as len,is_nullable as NULLABLE,column_DEFAULT as DATA_DEFAULT,TABLE_NAME,column_comment as comm,'yy' as java_type , if(is_nullable='NO','0','1') as java_null,coalesce(t.numeric_scale, 0) as scale "
                     + "from INFORMATION_SCHEMA.COLUMNS t where upper(table_schema)='" + schemaName.toUpperCase() + "' and upper(table_name)='" + tableName.toUpperCase() + "' and column_key!='PRI' order by TABLE_NAME,COLUMN_NAME";
+        } else {
+            return null;
+        }
+    }
+    public String getFieldForeignNames( String schemaName, String tableName, String colName) {
+        if (dbType.equals(DbType.ORACLE)) {
+            return "select colname,rtable,rcolname,rowner,TABLE_NAME,fkname "
+                    + "from (select *"
+                    + "      from ( select cc.COLUMN_NAME from all_cons_columns cc where cc.OWNER = c.OWNER  and cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME) colname,"
+                    +"                     ric.TABLE_NAME as rtable,ric.COLUMN_NAME as rcolname,ric.TABLE_OWNER as rowner,c.CONSTRAINT_NAME as fkname,c.TABLE_NAME"
+                    +"              from all_constraints c, all_constraints rc, all_indexes ri, all_ind_columns ric"
+                    +"              where c.CONSTRAINT_TYPE = 'R' and c.TABLE_NAME ='"+tableName.toUpperCase()+"' and c.OWNER ='"+schemaName.toUpperCase()+"' and c.R_OWNER = rc.OWNER and c.R_CONSTRAINT_NAME = rc.CONSTRAINT_NAME and rc.INDEX_OWNER=ri.OWNER and rc.INDEX_NAME=ri.INDEX_NAME and ri.OWNER=ric.INDEX_OWNER and ri.INDEX_NAME=ric.INDEX_NAME"
+                    +"       )"
+                    + "      where colname = '" + colName.toUpperCase() + "')";
+        } else if (dbType.equals(DbType.MYSQL)) {
+            return "select b.for_col_name,upper(REPLACE(SUBSTRING(SUBSTRING_INDEX(a.ref_name, '/',2),LENGTH(SUBSTRING_INDEX(a.ref_name, '/', 2 -1)) + 1),'/', '')) as rtable,b.ref_col_name as rcolname,upper(REPLACE(SUBSTRING(SUBSTRING_INDEX(a.ref_name, '/',1),LENGTH(SUBSTRING_INDEX(a.ref_name, '/', 1 -1)) + 1),'/', '')) as rowner,'" + colName.toUpperCase() + "' as TABLE_NAME, REPLACE(SUBSTRING(SUBSTRING_INDEX(a.id, '/',2),LENGTH(SUBSTRING_INDEX(a.id, '/', 2 -1)) + 1),'/', '') as fkname "
+                    + "from INFORMATION_SCHEMA.INNODB_FOREIGN a,INFORMATION_SCHEMA.INNODB_FOREIGN_COLS b where upper(a.for_name)= '" + schemaName.toUpperCase() + "/" + tableName.toUpperCase() + "' and upper(b.for_col_name)='" + colName.toUpperCase() + "' and a.id=b.id";
         } else {
             return null;
         }

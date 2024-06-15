@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 
 /**
  * @author m.h paydar
@@ -77,6 +78,7 @@ public class RunGenSpring {
                 argDBType = args[6];
                 argProgramName = args[7];
             }
+            HashMap<String,TableModel> tableInfo= new HashMap<>();
             DTConnection cnn = new DTConnection(argDBType);
             Connection conn = cnn.getConn(argSchema, argDb);
             Statement stmt = conn.createStatement();
@@ -98,9 +100,6 @@ public class RunGenSpring {
                 ResultSet res1 = stmt1.executeQuery(cnn.getPkName(tableModel.getOwnerName(), tableModel.getTableName()));
                 ColumnData pkData = new ColumnData();
                 if (res1.next()) {
-//                    tableModel.setPkName(res1.getString("column_name"));
-//                    tableModel.setPkType(res1.getString("data_type").toUpperCase(), res1.getString("len"), res1.getString("scale"));
-//                    tableModel.setPkExtra(res1.getString("extra"));
                     pkData.setColName(res1.getString("column_name"));
                     pkData.setColLen(res1.getInt("len"));
                     pkData.setColScale(res1.getInt("scale"));
@@ -118,7 +117,7 @@ public class RunGenSpring {
                  * ******* FIELDS *********
                  */
                 Statement stmt2 = conn.createStatement();
-                ResultSet res2 = stmt2.executeQuery(cnn.getFieldNames(argDBType, tableModel.getOwnerName(), tableModel.getTableName(), tableModel.getPkName()));
+                ResultSet res2 = stmt2.executeQuery(cnn.getFieldNames(tableModel.getOwnerName(), tableModel.getTableName(), tableModel.getPkName()));
                 while (res2.next()) {
                     ColumnData data = new ColumnData();
                     data.setColName(res2.getString("column_name"));
@@ -128,19 +127,19 @@ public class RunGenSpring {
                     data.setColNullable(res2.getString("java_null").equals("1"));
                     data.setColTitle(res2.getString("comm"));
                     data.setParent(0);
+                    data.setIsDuplicate(0);
                     /*
                      * ***** PARENT FK *************
                      */
                     Statement stmt3 = conn.createStatement();
-                    ResultSet res3 = stmt3.executeQuery(cnn.getFieldForigenNames(tableModel.getOwnerName(), tableModel.getTableName(), data.getColName()));
+                    ResultSet res3 = stmt3.executeQuery(cnn.getFieldForeignNames(tableModel.getOwnerName(), tableModel.getTableName(), data.getColName()));
                     String ref = "";
                     if (res3.next()) {
                         ref = res3.getString("rowner");
                         data.setParentOwner(ref);
                         data.setParentTable(res3.getString("rtable"));
                         data.setParentColName(res3.getString("rcolname"));
-                        data.setParentFKName(res3.getString("fkname"));
-                        data.setIsDuplicate(0);
+                        data.setFKDbName(res3.getString("fkname"));
                     }
                     res3.close();
                     stmt3.close();
@@ -159,12 +158,13 @@ public class RunGenSpring {
                 stmt2.close();
                 tableModel.calc();
                 System.out.print(" calc ");
+                tableInfo.put(tableModel.getOwnerName()+tableModel.getTableColName(),tableModel);
             }
             res.close();
             stmt.close();
             conn.close();
 
-            createProject(argDir, argProgramName);
+//            createProject(argDir, argProgramName);
         }catch (Exception ex){
             ex.printStackTrace();
         }

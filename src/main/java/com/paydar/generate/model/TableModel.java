@@ -43,19 +43,24 @@ public class TableModel implements Serializable {
     public void calc() {
         this.isUserLog = false;
         if (lstColumnData != null) {
+            /*
+             * find user log table
+             */
             for (ColumnData colData : lstColumnData) {
                 if (colData.getColName().equalsIgnoreCase(Constant.USER_REG_FIELD)) {
                     this.isUserLog = true;
-                    //this.isReadOnly=false;
                     break;
                 }
             }
+            /*
+             * find tree table
+             */
             for (int m = 0; m < lstColumnData.size(); m++) {
                 if (lstColumnData.get(m).getParent() > 0) {
-                    String a = Utils.getColName(lstColumnData.get(m).getParentTable().replaceAll("TBL_", ""));
+                    String a = Utils.getColName(lstColumnData.get(m).getParentTable().replaceAll(Constant.REPLACE_TABLE_PATTERN, ""));
                     for (int n = m + 1; n < lstColumnData.size(); n++) {
                         if (lstColumnData.get(n).getParent() > 0) {
-                            if (Utils.getColName(lstColumnData.get(n).getParentTable().replaceAll("TBL_", "")).equals(a)) {
+                            if (Utils.getColName(lstColumnData.get(n).getParentTable().replaceAll(Constant.REPLACE_TABLE_PATTERN, "")).equals(a)) {
                                 lstColumnData.get(n).setIsDuplicate(1);
                                 lstColumnData.get(m).setIsDuplicate(1);
                             }
@@ -64,45 +69,72 @@ public class TableModel implements Serializable {
                 }
             }
             if (this.lstIndexData != null) {
+                /*
+                 * find unique column constraint
+                 */
                 for (ColumnData colData : lstColumnData) {
                     for (IndexData inxd : this.lstIndexData) {
                         if (!inxd.getNonUnique()) {
-                            if (inxd.getData().toUpperCase().equals(colData.getColName().toUpperCase())) {
+                            if (inxd.getData().equalsIgnoreCase(colData.getColName())) {
                                 colData.setColUnique(true);
                                 inxd.addCols(colData);
                             }
                         }
                     }
                 }
+                /*
+                 * find index simple columns
+                 */
                 for (IndexData inxd : this.lstIndexData) {
-                    if (!inxd.getNonUnique()) {
-                        if (inxd.getData().indexOf(",") > 0) {
-                            String[] split = inxd.getData().split(",");
-                            for (String s : split) {
-                                for (ColumnData colData : lstColumnData) {
-                                    if (s.equalsIgnoreCase(colData.getColName())) {
-                                        inxd.addCols(colData);
-                                    }
+//                    if (inxd.getNonUnique()) {
+                    if (inxd.getData().indexOf(",") > 0) {
+                        String[] split = inxd.getData().split(",");
+                        for (String s : split) {
+                            for (ColumnData colData : lstColumnData) {
+                                if (s.equalsIgnoreCase(colData.getColName())) {
+                                    inxd.addCols(colData);
                                 }
                             }
                         }
                     }
+//                    }
                     inxd.calcSearching();
                 }
             }
         }
-
-        if (this.pkColumn.getExtraInfo() != null) {
-            if (this.pkColumn.getExtraInfo().toLowerCase().indexOf("increment") > 0) {
-                this.sequenceType = SequenceType.IDENTITY;
-                this.sequenceName = "";
+        if (this.pkColumn != null) {
+            if (this.pkColumn.getExtraInfo() != null) {
+                if (this.pkColumn.getExtraInfo().toLowerCase().indexOf("increment") > 0) {
+                    this.sequenceType = SequenceType.IDENTITY;
+                    this.sequenceName = "";
+                } else {
+                    this.sequenceType = SequenceType.SEQUENCE;
+                    this.sequenceName = getTableName().replaceAll("TBL", "SEQ");
+                }
             } else {
                 this.sequenceType = SequenceType.SEQUENCE;
                 this.sequenceName = getTableName().replaceAll("TBL", "SEQ");
             }
         } else {
-            this.sequenceType = SequenceType.SEQUENCE;
-            this.sequenceName = getTableName().replaceAll("TBL", "SEQ");
+            ColumnData temp = null;
+            if (lstColumnData != null)
+                for (ColumnData colData : lstColumnData) {
+                    if (colData.getColUnique()) {
+                        if (colData.getColJavaType().equals(JavaType.LONG) || colData.getColJavaType().equals(JavaType.INTEGER) || colData.getColJavaType().equals(JavaType.BIG_DECIMAL)) {
+                            temp = colData;
+                            break;
+                        } else {
+                            if (temp != null)
+                                temp = colData;
+                        }
+                    }
+                }
+            if (temp != null) {
+                this.sequenceType = SequenceType.OTHERS;
+                this.sequenceName = "";
+                temp.setVirtualPk(true);
+                this.pkColumn = temp;
+            }
         }
 
     }
@@ -136,7 +168,7 @@ public class TableModel implements Serializable {
     public void setTableName(String tableName) {
         this.tableName = tableName;
         this.clazzName = Utils.getClassName(tableName);
-        this.tableColName = Utils.getColName(tableName.replaceAll("TBL_", ""));
+        this.tableColName = Utils.getColName(tableName.replaceAll(Constant.REPLACE_TABLE_PATTERN, ""));
     }
 
     public String getClazzName() {
@@ -147,9 +179,9 @@ public class TableModel implements Serializable {
 //        this.clazzName = clazzName;
 //    }
 
-//    public String getPkName() {
-//        return pkName;
-//    }
+    public String getPkName() {
+        return this.pkColumn != null ? this.pkColumn.getColName() : "*";
+    }
 //
 //    public void setPkName(String pkName) {
 //        this.pkName = pkName;
@@ -166,7 +198,7 @@ public class TableModel implements Serializable {
 //    }
 
     public String getPkColumnName() {
-        return this.pkColumn!=null?this.pkColumn.getColName():"";
+        return this.pkColumn != null ? this.pkColumn.getColName() : "*";
     }
 
 //    public void setPkColumnName(String pkColumnName) {

@@ -11,7 +11,8 @@ import java.util.Arrays;
  */
 public enum SequenceType {
     SEQUENCE(1, "SEQUENCE"),
-    IDENTITY(2, "IDENTITY");
+    IDENTITY(2, "IDENTITY"),
+    OTHERS(9, "OTHERS");
 
     final int code;
     final String value;

@@ -30,10 +30,11 @@ public class ColumnData implements Serializable {
     private String parentOwner;
     private String parentTable;
     private String parentTableJava;
-    //    private String parentColName;
-//    private String parentFKName;
+    private String parentColName;
+    private String FKDbName;
     private int isDuplicate;
     private String extraInfo;
+    private boolean virtualPk;
 
     public String getColName() {
         return colName;
@@ -43,6 +44,7 @@ public class ColumnData implements Serializable {
         this.colName = colName;
         this.colNameJava = Utils.getColName(colName);
         this.colNameNet = Utils.getColName_NET(colName);
+        this.virtualPk=false;
     }
 
     public ColumnDBType getColType() {
@@ -158,13 +160,13 @@ public class ColumnData implements Serializable {
         this.parentTableJava = parentTable.replaceAll(Constant.REPLACE_TABLE_PATTERN, "");
     }
 
-//    public String getParentColName() {
-//        return parentColName;
-//    }
-//
-//    public void setParentColName(String parentColName) {
-//        this.parentColName = parentColName;
-//    }
+    public String getParentColName() {
+        return parentColName;
+    }
+
+    public void setParentColName(String parentColName) {
+        this.parentColName = parentColName;
+    }
 
     public int getIsDuplicate() {
         return isDuplicate;
@@ -191,13 +193,13 @@ public class ColumnData implements Serializable {
         this.colScale = colScale;
     }
 
-//    public String getParentFKName() {
-//        return parentFKName;
-//    }
-//
-//    public void setParentFKName(String parentFKName) {
-//        this.parentFKName = parentFKName;
-//    }
+    public String getFKDbName() {
+        return FKDbName;
+    }
+
+    public void setFKDbName(String parentFKName) {
+        this.FKDbName = parentFKName;
+    }
 
     public boolean getColUnique() {
         return colUnique;
@@ -233,6 +235,14 @@ public class ColumnData implements Serializable {
 
     public void setExtraInfo(String extraInfo) {
         this.extraInfo = extraInfo;
+    }
+
+    public boolean isVirtualPk() {
+        return virtualPk;
+    }
+
+    public void setVirtualPk(boolean virtualPk) {
+        this.virtualPk = virtualPk;
     }
 
     @Override
