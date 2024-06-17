@@ -24,6 +24,7 @@ public class TableModel implements Serializable {
     private String tableName;
     private String clazzName;
     private String tableColName;
+    private String tableColNameNet;
     private ColumnData pkColumn;
     //    private String pkName;
 //    private JavaType pkType;
@@ -34,11 +35,16 @@ public class TableModel implements Serializable {
 //    private String pkColumnNameNet;
     private SequenceType sequenceType;
     private String sequenceName;
-    private List<ColumnData> lstColumnData;
+    private boolean isExtraInfo;
     private boolean isUserLog;
     private boolean isReadOnly;
-
+    private String extendsClass;
+    private List<ColumnData> lstColumnData;
     private List<IndexData> lstIndexData;
+
+    public String getKey() {
+        return getOwnerName() + getTableColName();
+    }
 
     public void calc() {
         this.isUserLog = false;
@@ -46,9 +52,11 @@ public class TableModel implements Serializable {
             /*
              * find user log table
              */
+            this.extendsClass = "AbstractNonEntity";
             for (ColumnData colData : lstColumnData) {
                 if (colData.getColName().equalsIgnoreCase(Constant.USER_REG_FIELD)) {
                     this.isUserLog = true;
+                    this.extendsClass = Constant.AUDIT_ENTITY;
                     break;
                 }
             }
@@ -57,12 +65,15 @@ public class TableModel implements Serializable {
              */
             for (int m = 0; m < lstColumnData.size(); m++) {
                 if (lstColumnData.get(m).getParent() > 0) {
-                    String a = Utils.getColName(lstColumnData.get(m).getParentTable().replaceAll(Constant.REPLACE_TABLE_PATTERN, ""));
-                    for (int n = m + 1; n < lstColumnData.size(); n++) {
-                        if (lstColumnData.get(n).getParent() > 0) {
-                            if (Utils.getColName(lstColumnData.get(n).getParentTable().replaceAll(Constant.REPLACE_TABLE_PATTERN, "")).equals(a)) {
-                                lstColumnData.get(n).setIsDuplicate(1);
-                                lstColumnData.get(m).setIsDuplicate(1);
+                    if (!Constant.userFields.contains(lstColumnData.get(m).getColName().toLowerCase())) {
+                        String a = Utils.getColName(lstColumnData.get(m).getParentDbTable().replaceAll(Constant.REPLACE_TABLE_PATTERN_START, ""));
+                        for (int n = m + 1; n < lstColumnData.size(); n++) {
+                            if (lstColumnData.get(n).getParent() > 0) {
+                                if (!Constant.userFields.contains(lstColumnData.get(n).getColName().toLowerCase()))
+                                    if (Utils.getColName(lstColumnData.get(n).getParentDbTable().replaceAll(Constant.REPLACE_TABLE_PATTERN_START, "")).equals(a)) {
+                                        lstColumnData.get(n).setIsDuplicate(1);
+                                        lstColumnData.get(m).setIsDuplicate(1);
+                                    }
                             }
                         }
                     }
@@ -166,9 +177,11 @@ public class TableModel implements Serializable {
     }
 
     public void setTableName(String tableName) {
+        this.isExtraInfo=false;
         this.tableName = tableName;
         this.clazzName = Utils.getClassName(tableName);
-        this.tableColName = Utils.getColName(tableName.replaceAll(Constant.REPLACE_TABLE_PATTERN, ""));
+        this.tableColName = Utils.getColName(tableName.replaceAll(Constant.REPLACE_TABLE_PATTERN_START, ""));
+        this.tableColNameNet = Utils.getColName_NET(tableName.replaceAll(Constant.REPLACE_TABLE_PATTERN_START, ""));
     }
 
     public String getClazzName() {
@@ -205,9 +218,9 @@ public class TableModel implements Serializable {
 //        this.pkColumnName = pkColumnName;
 //    }
 
-//    public ColumnDBType getPkColumnType() {
-//        return pkColumnType;
-//    }
+    public JavaType getPkColumnType() {
+        return this.pkColumn != null ? this.pkColumn.getColJavaType() : JavaType.LONG;
+    }
 //
 //    public void setPkColumnType(String pkColumnType) {
 //        this.pkColumnType = ColumnDBType.of(pkColumnType);
@@ -374,6 +387,9 @@ public class TableModel implements Serializable {
         return tableColName;
     }
 
+    public String getTableColNameNet() {
+        return tableColNameNet;
+    }
 //    public void setTableColName(String tableColName) {
 //        this.tableColName = tableColName;
 //    }
@@ -394,4 +410,14 @@ public class TableModel implements Serializable {
         this.pkColumn = pkColumn;
     }
 
+    public String getExtendsClass() {
+        return extendsClass;
+    }
+
+    public void setExtraInfo(boolean extraInfo) {
+        isExtraInfo = extraInfo;
+    }
+    public boolean isExtraInfo() {
+        return isExtraInfo;
+    }
 }

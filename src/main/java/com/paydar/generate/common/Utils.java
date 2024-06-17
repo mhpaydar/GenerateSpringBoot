@@ -12,6 +12,7 @@ import java.nio.file.Paths;
  * @copyright
  */
 public class Utils {
+
     /***
      * Create path to save output
      * @param dir path
@@ -22,7 +23,18 @@ public class Utils {
         if (!Files.exists(releaseFolder))
             Files.createDirectory(releaseFolder);
     }
-
+    public static String genPath(String dir,String packages) throws Exception {
+        Path releaseFolder = Paths.get(dir);
+        if (!Files.exists(releaseFolder))
+            Files.createDirectory(releaseFolder);
+        String[] splitPackage = packages.split("\\.");
+        String path=dir;
+        for (String s:splitPackage) {
+            path+=Constant.fileSep+s;
+            genPath(path);
+        }
+        return path;
+    }
     /**
      * Get camelcase template Class name
      * @param param parameter
@@ -30,8 +42,8 @@ public class Utils {
      */
     public static String getClassName(String param) {
         StringBuilder ret = new StringBuilder();
-        String[] pa = param.split("_");
-        for (int i = 1; i < pa.length; i++) {
+        String[] pa = param.replaceAll(Constant.REPLACE_TABLE_PATTERN_START,"").split("_");
+        for (int i = 0; i < pa.length; i++) {
             ret.append(pa[i].substring(0, 1).toUpperCase());
             ret.append(pa[i].substring(1).toLowerCase());
         }
@@ -68,36 +80,51 @@ public class Utils {
         }
         return ret.toString();
     }
-
-    public static String getColNameParent(String p, String f) {
-        String ret = "";
-        String[] pa = p.split("_");
-        ret += pa[0].toLowerCase();
-        String[] fa = f.split("_");
+    /**
+     * Get camelcase template foregin key column name
+     * @param param parameter
+     * @return
+     */
+    public static String getParentColName(String param) {
+        StringBuilder ret = new StringBuilder();
+        String param1=param.replaceAll(Constant.REPLACE_FK_PATTERN_START,"").replaceAll(Constant.REPLACE_FK_PATTERN_END,"");
+        String[] pa = param1.split("_");
+        ret.append(pa[0].toLowerCase());
         for (int i = 1; i < pa.length; i++) {
-            ret += pa[i].substring(0, 1).toUpperCase() + pa[i].substring(1).toLowerCase();
+            ret.append(pa[i].substring(0, 1).toUpperCase());
+            ret.append(pa[i].substring(1).toLowerCase());
         }
-        String ff = fa[fa.length - 2];
-        ret += ff.substring(0, 1).toUpperCase() + ff.substring(1).toLowerCase();
-        return ret;
+        return ret.toString();
     }
+//    public static String getColNameParent(String p, String f) {
+//        String ret = "";
+//        String[] pa = p.split("_");
+//        ret += pa[0].toLowerCase();
+//        String[] fa = f.split("_");
+//        for (int i = 1; i < pa.length; i++) {
+//            ret += pa[i].substring(0, 1).toUpperCase() + pa[i].substring(1).toLowerCase();
+//        }
+//        String ff = fa[fa.length - 2];
+//        ret += ff.substring(0, 1).toUpperCase() + ff.substring(1).toLowerCase();
+//        return ret;
+//    }
 
-    public static String getColNameParent_NET(String p, String f) {
-        String ret = "";
-        String[] pa = p.split("_");
-        String[] fa = f.split("_");
-        for (int i = 0; i < pa.length; i++) {
-            ret += pa[i].substring(0, 1).toUpperCase() + pa[i].substring(1).toLowerCase();
-        }
-        String ff = fa[fa.length - 2];
-        ret += ff.substring(0, 1).toUpperCase() + ff.substring(1).toLowerCase();
-        return ret;
-    }
-
-    public static String getColNameChildren_NET(String p) {
-        String ret = getColNameChildren(p);
-        return ret.substring(0, 1).toUpperCase() + ret.substring(1);
-    }
+//    public static String getColNameParent_NET(String p, String f) {
+//        String ret = "";
+//        String[] pa = p.split("_");
+//        String[] fa = f.split("_");
+//        for (int i = 0; i < pa.length; i++) {
+//            ret += pa[i].substring(0, 1).toUpperCase() + pa[i].substring(1).toLowerCase();
+//        }
+//        String ff = fa[fa.length - 2];
+//        ret += ff.substring(0, 1).toUpperCase() + ff.substring(1).toLowerCase();
+//        return ret;
+//    }
+//
+//    public static String getColNameChildren_NET(String p) {
+//        String ret = getColNameChildren(p);
+//        return ret.substring(0, 1).toUpperCase() + ret.substring(1);
+//    }
 
     public static String getColNameChildren(String p) {
         String ret = "";

@@ -27,15 +27,19 @@ public class ColumnData implements Serializable {
     private JavaType colJavaType;
     private boolean colUnique;
     private int parent;
-    private String parentOwner;
-    private String parentTable;
-    private String parentTableJava;
-    private String parentColName;
+    private String parentDbOwner;
+    private String parentDbTable;
+    private String parentTableColName;
+    private String parentDbColName;
+    private String parentColNameJava;
     private String FKDbName;
     private int isDuplicate;
     private String extraInfo;
     private boolean virtualPk;
 
+    public String getParentTableKey(){
+        return getParentDbOwner()+getParentTableColName();
+    }
     public String getColName() {
         return colName;
     }
@@ -44,6 +48,7 @@ public class ColumnData implements Serializable {
         this.colName = colName;
         this.colNameJava = Utils.getColName(colName);
         this.colNameNet = Utils.getColName_NET(colName);
+        this.parentColNameJava=Utils.getParentColName(colName);
         this.virtualPk=false;
     }
 
@@ -143,29 +148,29 @@ public class ColumnData implements Serializable {
         this.parent = parent;
     }
 
-    public String getParentOwner() {
-        return parentOwner;
+    public String getParentDbOwner() {
+        return parentDbOwner;
     }
 
-    public void setParentOwner(String parentOwner) {
-        this.parentOwner = parentOwner;
+    public void setParentDbOwner(String parentOwner) {
+        this.parentDbOwner = parentOwner;
     }
 
-    public String getParentTable() {
-        return parentTable;
+    public String getParentDbTable() {
+        return parentDbTable;
     }
 
-    public void setParentTable(String parentTable) {
-        this.parentTable = parentTable;
-        this.parentTableJava = parentTable.replaceAll(Constant.REPLACE_TABLE_PATTERN, "");
+    public void setParentDbTable(String parentTable) {
+        this.parentDbTable = parentTable;
+        this.parentTableColName =  Utils.getColName(parentTable.replaceAll(Constant.REPLACE_TABLE_PATTERN_START, ""));
     }
 
-    public String getParentColName() {
-        return parentColName;
+    public String getParentDbColName() {
+        return parentDbColName;
     }
 
-    public void setParentColName(String parentColName) {
-        this.parentColName = parentColName;
+    public void setParentDbColName(String parentColName) {
+        this.parentDbColName = parentColName;
     }
 
     public int getIsDuplicate() {
@@ -225,8 +230,8 @@ public class ColumnData implements Serializable {
 //    public void setColNameNet(String colNameNet) {
 //        this.colNameNet = colNameNet;
 //    }
-    public String getParentTableJava() {
-        return parentTableJava;
+    public String getParentTableColName() {
+        return parentTableColName;
     }
 
     public String getExtraInfo() {
@@ -245,6 +250,9 @@ public class ColumnData implements Serializable {
         this.virtualPk = virtualPk;
     }
 
+    public String getParentColNameJava() {
+        return parentColNameJava;
+    }
     @Override
     public String toString() {
         return "ColData{" +
@@ -259,10 +267,10 @@ public class ColumnData implements Serializable {
                 ", colJavaType='" + colJavaType + '\'' +
                 ", colUnique='" + colUnique + '\'' +
                 ", parent=" + parent +
-                ", parentOwner='" + parentOwner + '\'' +
-                ", parentTable='" + parentTable + '\'' +
-//                ", parentColName='" + parentColName + '\'' +
-//                ", parentFKName='" + parentFKName + '\'' +
+                ", parentOwner='" + parentDbOwner + '\'' +
+                ", parentTable='" + parentTableColName + '\'' +
+                ", parentColName='" + parentDbColName + '\'' +
+                ", parentFKName='" + FKDbName + '\'' +
                 ", isDuplicate=" + isDuplicate +
                 '}';
     }

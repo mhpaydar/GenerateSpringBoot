@@ -1,6 +1,8 @@
 package com.paydar.generate.model;
 
+import com.paydar.generate.common.Constant;
 import com.paydar.generate.common.Utils;
+import com.paydar.generate.enums.IndexDbType;
 import com.paydar.generate.enums.JavaType;
 
 import java.io.Serializable;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 public class IndexData implements Serializable {
     private String name;
-    private String type;
+    private IndexDbType type;
     private String data;
     private boolean nonUnique;
     private List<ColumnData> cols;
@@ -33,12 +35,12 @@ public class IndexData implements Serializable {
         this.name = name;
     }
 
-    public String getType() {
+    public IndexDbType getType() {
         return type;
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.type =IndexDbType.of(type);
     }
 
     public String getData() {
@@ -123,17 +125,18 @@ public class IndexData implements Serializable {
                     } else {
 
                         String mapped = "";
+                        TableModel parentTable= Constant.tableInfo.get(d.getParentTableKey());
                         if (d.getIsDuplicate() == 0) {
-                            mapped = Utils.getColName(d.getParentTableJava());
+                            mapped = parentTable.getTableColName();// Utils.getColName(d.getParentTableJava());
                         } else {
-                            mapped = Utils.getColNameParent(d.getParentTableJava(), d.getColName());
+                            mapped = parentTable.getTableColName()+d.getParentColNameJava();// Utils.getColNameParent(d.getParentTableJava(), d.getColName());
                         }
 
                         String cfnnp = "";
                         if (d.getIsDuplicate() == 0) {
-                            cfnnp = Utils.getColName_NET(d.getParentTableJava());
+                            cfnnp = parentTable.getTableColNameNet();// Utils.getColName_NET(d.getParentTableJava());
                         } else {
-                            cfnnp = Utils.getColNameParent_NET(d.getParentTableJava(), d.getColName());
+                            cfnnp = parentTable.getTableColNameNet()+d.getParentColNameJava();;// Utils.getColNameParent_NET(d.getParentTableJava(), d.getColName());
                         }
                         sb.append("And" + cfnnp + "Id");
                         sbp.append(",final Long " + mapped + "Id");
