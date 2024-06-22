@@ -123,7 +123,6 @@ public class IndexData implements Serializable {
                             sbe.append("&& @.get"+d.getColNameNet()+"().equals(#.get" + d.getColNameNet()+"())");
                         }
                     } else {
-
                         String mapped = "";
                         TableModel parentTable= Constant.tableInfo.get(d.getParentTableKey());
                         if (d.getIsDuplicate() == 0) {
@@ -131,7 +130,6 @@ public class IndexData implements Serializable {
                         } else {
                             mapped = parentTable.getTableColName()+d.getParentColNameJava();// Utils.getColNameParent(d.getParentTableJava(), d.getColName());
                         }
-
                         String cfnnp = "";
                         if (d.getIsDuplicate() == 0) {
                             cfnnp = parentTable.getTableColNameNet();// Utils.getColName_NET(d.getParentTableJava());

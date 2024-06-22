@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class FileEntity {
     public static void gen(TableModel tableModel, String __PKGJAVA) throws Exception {
-        if(tableModel.isExtraInfo()) return;
+//        if (tableModel.isExtraInfo()) return;
         StringBuilder sbjava = new StringBuilder();//define
         StringBuilder sbjavaIndex = new StringBuilder();//define index
 //        StringBuilder sbjavaB = new StringBuilder();//builder
@@ -51,10 +51,10 @@ public class FileEntity {
         if (tableModel.isIsReadOnly()) {
             comment = "//";
         }
-        if(tableModel.getSequenceType().equals(SequenceType.SEQUENCE)){
+        if (tableModel.getSequenceType().equals(SequenceType.SEQUENCE)) {
             sbjava.append(comment + "\t@GeneratedValue(strategy = GenerationType." + tableModel.getSequenceType().getValue() + ", generator = \"" + tableModel.getSequenceName() + "\")\n");
             sbjava.append(comment + "\t@SequenceGenerator(schema=\"" + tableModel.getOwnerName() + "\",sequenceName = \"" + tableModel.getSequenceName() + "\", allocationSize = 1, name = \"" + tableModel.getSequenceName() + "\")\n");
-        }else if(tableModel.getSequenceType().equals(SequenceType.IDENTITY)){
+        } else if (tableModel.getSequenceType().equals(SequenceType.IDENTITY)) {
             sbjava.append(comment + "\t@GeneratedValue(strategy = GenerationType." + tableModel.getSequenceType() + " )\n");
         }
         sbjava.append("\tprivate " + tableModel.getPkColumnType().getValue() + " " + "id" + ";\n");
@@ -88,11 +88,12 @@ public class FileEntity {
 //                        sbjavaB.append("\t\tpublic Builder " + d.getColNameJava() + "(" + d.getColJavaType() + " " + d.getColNameJava() + ") {" + tableModel.getTableColName() + ".set" + d.getColNameNet() + "(" + d.getColNameJava() + "); return this;}\n");
                     } else {
                         String mapped = "";
-                        TableModel parentTable= Constant.tableInfo.get(d.getParentTableKey());
+                        TableModel parentTable = Constant.tableInfo.get(d.getParentTableKey());
                         if (d.getIsDuplicate() == 0) {
-                            mapped = parentTable.getTableColName();;// Utils.getColName(d.getParentTable().replaceAll("TBL_", ""));
+                            mapped = parentTable.getTableColName();
+                            ;// Utils.getColName(d.getParentTable().replaceAll("TBL_", ""));
                         } else {
-                            mapped = parentTable.getTableColName()+d.getParentColNameJava(); //Utils.getColNameParent(d.getParentTable().replaceAll("TBL_", ""), d.getColName());
+                            mapped = parentTable.getTableColName() + d.getParentColNameJava(); //Utils.getColNameParent(d.getParentTable().replaceAll("TBL_", ""), d.getColName());
                         }
 //                        String cftp = Utils.getClassName(d.getParentTable());
                         if (d.getColNullable()) {
@@ -122,8 +123,8 @@ public class FileEntity {
 //        lstjava.add("\t}\n");
         lstjava.add("\n}\n");
 
-        String dir = Utils.genPath(Constant.argDir,__PKGJAVA);
+        String dir = Utils.genPath(Constant.argDir, __PKGJAVA);
         Files.write(Paths.get(dir + Constant.fileSep + tableModel.getClazzName() + ".java"), lstjava);
-
+        lstjava.clear();
     }
 }

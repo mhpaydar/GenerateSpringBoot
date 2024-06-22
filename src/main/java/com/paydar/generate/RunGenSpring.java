@@ -1,7 +1,7 @@
 package com.paydar.generate;
 
 import com.paydar.generate.common.*;
-import com.paydar.generate.files.data.FileEntity;
+import com.paydar.generate.files.data.*;
 import com.paydar.generate.model.*;
 
 import java.io.File;
@@ -103,11 +103,11 @@ public class RunGenSpring {
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
-//                try {
-//                    FileRepository.gen(tableModel, __PKGJAVA, argDir);
-//                } catch (Exception e1) {
-//                    e1.printStackTrace();
-//                }
+                try {
+                    FileRepository.gen(tableModel, __PKGJAVA);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
 //            createProject(argDir, argProgramName);
             }
         } catch (Exception ex) {
