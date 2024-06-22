@@ -38,12 +38,12 @@ public class FileRepository {
                             //sbjava.append("\n\t@Column(name = \"" + d.getColName() + "\" " + readOnlyStr + " , columnDefinition = \"" + d.getColType() + "\")\n");
                         } else {
                             if (d.getColUnique()) {
-                                sbjavaR.append("\tboolean existsBy" + d.getColNameNet() + "(final " + d.getColJavaType() + " " + d.getColNameJava() + ");\n");
-                                sbjavaR.append("\tlong countBy" + d.getColNameNet() + "(final " + d.getColJavaType() + " " + d.getColNameJava() + ");\n");
-                                sbjavaR.append("\tOptional<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType() + " " + d.getColNameJava() + ");\n\n");
+                                sbjavaR.append("\tboolean existsBy" + d.getColNameNet() + "(final " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ");\n");
+                                sbjavaR.append("\tlong countBy" + d.getColNameNet() + "(final " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ");\n");
+                                sbjavaR.append("\tOptional<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ");\n\n");
                             } else {
-                                sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType() + " " + d.getColNameJava() + ");\n");
-                                sbjavaR.append("\tPage<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType() + " " + d.getColNameJava() + " , Pageable pageable);\n\n");
+                                sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ");\n");
+                                sbjavaR.append("\tPage<" + tableModel.getClazzName() + "> findBy" + d.getColNameNet() + "(final " + d.getColJavaType().getValue() + " " + d.getColNameJava() + " , Pageable pageable);\n\n");
                             }
                         }
                     } else {
@@ -114,7 +114,7 @@ public class FileRepository {
 //        lstjavaRepository.add("import " + __PKGJAVA + "." + tableModel.getClazzName() + ";\n");
         lstjavaRepository.add("import org.springframework.data.domain.Page;\nimport org.springframework.data.domain.Pageable;\nimport org.springframework.data.jpa.domain.Specification;\nimport org.springframework.data.jpa.repository.Query;\nimport org.springframework.data.jpa.repository.query.Procedure;\nimport org.springframework.data.repository.query.Param;\n");
         lstjavaRepository.add("@Repository");
-        lstjavaRepository.add("public interface " + tableModel.getClazzName() + "Repository extends BaseRevisionRepository<" + tableModel.getClazzName() + ", " + tableModel.getPkColumnType() + "> {\n");
+        lstjavaRepository.add("public interface " + tableModel.getClazzName() + "Repository extends BaseRevisionRepository<" + tableModel.getClazzName() + ", " + tableModel.getPkColumnType().getValue() + "> {\n");
         lstjavaRepository.add(sbjavaR + "\n}\n");
 
         String dir = Utils.genPath(Constant.argDir, __PKGJAVA);
