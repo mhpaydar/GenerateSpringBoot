@@ -7,6 +7,7 @@ import com.paydar.generate.enums.JavaType;
 import com.paydar.generate.model.ColumnData;
 import com.paydar.generate.model.IndexData;
 import com.paydar.generate.model.TableModel;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -88,17 +89,34 @@ public class FileRepository {
                     }
                 }else{
                     if (indexData.getData().indexOf(",") > 0) {
-                        String[] splitData = indexData.getData().split(",");
-                        int j=1;
+                        String[] splitDataTemp = indexData.getData().split(",");
+                        List<String> splitData = new ArrayList<>();
+                        String dataIndex="";
+                        for(int i=0;i<splitDataTemp.length;i++) {
+                            StringBuilder sbData = new StringBuilder();
+                            dataIndex=splitDataTemp[i];
+                            sbData.append(dataIndex);
+                            int countStart = StringUtils.countMatches(dataIndex, "(");
+                            int countEnd = StringUtils.countMatches(dataIndex, ")");
+                            while(countStart!=countEnd){
+                                i++;
+                                dataIndex=splitDataTemp[i];
+                                sbData.append(","+splitDataTemp[i]);
+                                countStart+=StringUtils.countMatches(dataIndex, "(");
+                                countEnd += StringUtils.countMatches(dataIndex, ")");
+                            }
+                            splitData.add(sbData.toString().replaceAll("\"",""));
+                        }
+                        int jParam=1;
                         StringBuilder sbWhere= new StringBuilder();
                         StringBuilder sbParam= new StringBuilder();
                         for(String data:splitData){
-                            sbWhere.append("and  "+data+"= :P"+j);
-                            sbParam.append(",@Param(\"P"+j+"\") final String param"+j);
-                            j++;
+                            sbWhere.append(" and  "+data.replaceAll("\"","")+"= :P"+jParam);
+                            sbParam.append(", @Param(\"P"+jParam+"\") final String param"+jParam);
+                            jParam++;
                         }
-                        sbjavaR.append("\t@Query(value =\"select * from "+tableModel.getOwnerName()+"."+tableModel.getTableName()+" where "+ sbWhere.substring(4)+"\", nativeQuery = true)\n");
-                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData"+inx+"("+sbParam.substring(1)+");\n");
+                        sbjavaR.append("\t@Query(value =\"select * from "+tableModel.getOwnerName()+"."+tableModel.getTableName()+" where "+ sbWhere.substring(5)+"\", nativeQuery = true)\n");
+                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData"+inx+"("+sbParam.substring(2)+");\n");
                     }else{
                         sbjavaR.append("\t@Query(value =\"select * from "+tableModel.getOwnerName()+"."+tableModel.getTableName()+" where "+indexData.getData()+"= :P1\", nativeQuery = true)\n");
                         sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData"+inx+"(@Param(\"P1\") final String param1);\n");

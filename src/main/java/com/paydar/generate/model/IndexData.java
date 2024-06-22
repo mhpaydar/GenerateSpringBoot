@@ -118,7 +118,7 @@ public class IndexData implements Serializable {
                             //sbjava.append("\n\t@Column(name = \"" + d.getColName() + "\" " + readOnlyStr + " , columnDefinition = \"" + d.getColType() + "\")\n");
                         } else {
                             sb.append("And" + d.getColNameNet());
-                            sbp.append(",final " + d.getColJavaType() + " " + d.getColNameJava());
+                            sbp.append(",final " + d.getColJavaType().getValue() + " " + d.getColNameJava());
                             sbv.append(",#.get" + d.getColNameNet()+"()");
                             sbe.append("&& @.get"+d.getColNameNet()+"().equals(#.get" + d.getColNameNet()+"())");
                         }
