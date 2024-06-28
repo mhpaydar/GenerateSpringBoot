@@ -1,6 +1,7 @@
 package com.paydar.generate;
 
 import com.paydar.generate.common.*;
+import com.paydar.generate.files.api.*;
 import com.paydar.generate.files.data.*;
 import com.paydar.generate.model.*;
 
@@ -98,6 +99,7 @@ public class RunGenSpring {
             String __PKGJAVASRV = "com." + Constant.argProgramName.toLowerCase() + ".service.services." + Constant.argPackageName.toLowerCase();// + ";";
             for (String key : tableInfoKey) {
                 TableModel tableModel = Constant.tableInfo.get(key);
+
                 try {
                     FileEntity.gen(tableModel, __PKGJAVA);
                 } catch (Exception e1) {
@@ -105,6 +107,13 @@ public class RunGenSpring {
                 }
                 try {
                     FileRepository.gen(tableModel, __PKGJAVA);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                try {
+                    FileApiResponse.gen(tableModel, __PKGJAVAAPI);
+                    FileApiListResponse.gen(tableModel, __PKGJAVAAPI);
+                    FileApiParentResponse.gen(tableModel, __PKGJAVAAPI);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }

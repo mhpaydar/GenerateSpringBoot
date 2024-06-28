@@ -31,8 +31,9 @@ public class FileEntity {
         StringBuilder sbjavaParentH = new StringBuilder();//parent,children header
         StringBuilder sbjavaParent = new StringBuilder();//define parent,children
 
+        String ownerPackage ="."+tableModel.getOwnerName().toLowerCase();
 
-        sbjavaP.append("package " + __PKGJAVA + ";\n");
+        sbjavaP.append("package " + __PKGJAVA+ownerPackage + ";\n");
         sbjavaH.append("import javax.persistence.*;\n" +
                 "import java.time.LocalDateTime;\n" +
                 "import com.paydar.commons.spring.boot.data.entity.*;\n" +
@@ -91,11 +92,9 @@ public class FileEntity {
                         TableModel parentTable = Constant.tableInfo.get(d.getParentTableKey());
                         if (d.getIsDuplicate() == 0) {
                             mapped = parentTable.getTableColName();
-                            ;// Utils.getColName(d.getParentTable().replaceAll("TBL_", ""));
                         } else {
-                            mapped = parentTable.getTableColName() + d.getParentColNameJava(); //Utils.getColNameParent(d.getParentTable().replaceAll("TBL_", ""), d.getColName());
+                            mapped = parentTable.getTableColName() + d.getParentColNameJava();
                         }
-//                        String cftp = Utils.getClassName(d.getParentTable());
                         if (d.getColNullable()) {
                             sbjavaParent.append("\n\t@ManyToOne(fetch = FetchType.LAZY)\n\t");
                         } else {
@@ -104,6 +103,8 @@ public class FileEntity {
                         sbjavaParent.append("@JoinColumn(name =\"" + d.getColName() + "\" " + columnStr + " , foreignKey = @ForeignKey(name = \"" + d.getFKDbName() + "\"))\n");
                         sbjavaParent.append("\tprivate " + parentTable.getClazzName() + " " + mapped + ";\n");
 //                        sbjavaB.append("\t\tpublic Builder " + mapped + "(" + cftp + " " + mapped + ") {" + tableModel.getTableColName() + ".set" + cfnnp + "(" + mapped + "); return this;}\n");
+                        if (!parentTable.getOwnerName().equalsIgnoreCase(tableModel.getOwnerName()))
+                            sbjavaH.append("import " + __PKGJAVA + "." + parentTable.getOwnerName().toLowerCase() + "." + parentTable.getClazzName() + ";");
                     }
                 }
             }
@@ -123,7 +124,8 @@ public class FileEntity {
 //        lstjava.add("\t}\n");
         lstjava.add("\n}\n");
 
-        String dir = Utils.genPath(Constant.argDir, __PKGJAVA);
+
+        String dir = Utils.genPath(Constant.argDir, __PKGJAVA+ownerPackage);
         Files.write(Paths.get(dir + Constant.fileSep + tableModel.getClazzName() + ".java"), lstjava);
         lstjava.clear();
     }

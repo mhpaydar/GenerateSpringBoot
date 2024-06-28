@@ -29,8 +29,21 @@ public class FileRepository {
 //        if (tableModel.isExtraInfo()) return;
         StringBuilder sbjavaR = new StringBuilder();//define
         StringBuilder sbjavaP = new StringBuilder();//package
+        StringBuilder sbjavaH = new StringBuilder();//header
+        String ownerPackage = "." + tableModel.getOwnerName().toLowerCase();
 
-        sbjavaP.append("package " + __PKGJAVA + ";\n");
+        sbjavaP.append("package " + __PKGJAVA + ownerPackage + ";\n");
+        sbjavaH.append("import org.springframework.stereotype.Repository;\n" +
+                "import com.paydar.commons.spring.boot.data.repository.BaseRevisionRepository;\n" +
+                "import java.lang.annotation.Native;\n" +
+                "import java.util.List;\nimport java.util.Optional;\n" +
+                "import org.springframework.data.domain.Page;\n" +
+                "import org.springframework.data.domain.Pageable;\n" +
+                "import org.springframework.data.jpa.domain.Specification;\n" +
+                "import org.springframework.data.jpa.repository.Query;\n" +
+                "import org.springframework.data.jpa.repository.query.Procedure;\n" +
+                "import org.springframework.data.repository.query.Param;\n");
+
         if (tableModel.getLstColData() != null) {
             for (ColumnData d : tableModel.getLstColData()) {
                 if (!Constant.userFields.contains(d.getColName().toLowerCase())) {
@@ -73,7 +86,7 @@ public class FileRepository {
                 }
             }
         }
-        int inx=1;
+        int inx = 1;
         if (tableModel.getLstIndexData() != null) {
             for (IndexData indexData : tableModel.getLstIndexData()) {
                 if (indexData.getType().equals(IndexDbType.NORMAL)) {
@@ -87,39 +100,41 @@ public class FileRepository {
                             sbjavaR.append("\tOptional<" + tableModel.getClazzName() + "> findBy" + indexData.getSearching() + "(" + indexData.getSearchingParam() + ");\n");
                         }
                     }
-                }else{
+                } else {
                     if (indexData.getData().indexOf(",") > 0) {
                         String[] splitDataTemp = indexData.getData().split(",");
                         List<String> splitData = new ArrayList<>();
-                        String dataIndex="";
-                        for(int i=0;i<splitDataTemp.length;i++) {
+                        String dataIndex = "";
+                        for (int i = 0; i < splitDataTemp.length; i++) {
                             StringBuilder sbData = new StringBuilder();
-                            dataIndex=splitDataTemp[i];
+                            dataIndex = splitDataTemp[i];
                             sbData.append(dataIndex);
                             int countStart = StringUtils.countMatches(dataIndex, "(");
                             int countEnd = StringUtils.countMatches(dataIndex, ")");
-                            while(countStart!=countEnd){
+                            while (countStart != countEnd) {
                                 i++;
-                                dataIndex=splitDataTemp[i];
-                                sbData.append(","+splitDataTemp[i]);
-                                countStart+=StringUtils.countMatches(dataIndex, "(");
+                                dataIndex = splitDataTemp[i];
+                                sbData.append("," + splitDataTemp[i]);
+                                countStart += StringUtils.countMatches(dataIndex, "(");
                                 countEnd += StringUtils.countMatches(dataIndex, ")");
                             }
-                            splitData.add(sbData.toString().replaceAll("\"",""));
+                            splitData.add(sbData.toString().replaceAll("\"", ""));
                         }
-                        int jParam=1;
-                        StringBuilder sbWhere= new StringBuilder();
-                        StringBuilder sbParam= new StringBuilder();
-                        for(String data:splitData){
-                            sbWhere.append(" and  "+data.replaceAll("\"","")+"= :P"+jParam);
-                            sbParam.append(", @Param(\"P"+jParam+"\") final String param"+jParam);
+                        int jParam = 1;
+                        StringBuilder sbWhere = new StringBuilder();
+                        StringBuilder sbParam = new StringBuilder();
+                        for (String data : splitData) {
+                            sbWhere.append(" and  " + data.replaceAll("\"", "") + "= :P" + jParam);
+                            sbParam.append(", @Param(\"P" + jParam + "\") final String param" + jParam);
                             jParam++;
                         }
-                        sbjavaR.append("\t@Query(value =\"select * from "+tableModel.getOwnerName()+"."+tableModel.getTableName()+" where "+ sbWhere.substring(5)+"\", nativeQuery = true)\n");
-                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData"+inx+"("+sbParam.substring(2)+");\n");
-                    }else{
-                        sbjavaR.append("\t@Query(value =\"select * from "+tableModel.getOwnerName()+"."+tableModel.getTableName()+" where "+indexData.getData()+"= :P1\", nativeQuery = true)\n");
-                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData"+inx+"(@Param(\"P1\") final String param1);\n");
+                        sbjavaR.append("//\t" + indexData.getName() + "\n");
+                        sbjavaR.append("\t@Query(value =\"select * from " + tableModel.getOwnerName() + "." + tableModel.getTableName() + " where " + sbWhere.substring(5) + "\", nativeQuery = true)\n");
+                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData" + inx + "(" + sbParam.substring(2) + ");\n");
+                    } else {
+                        sbjavaR.append("//\t" + indexData.getName() + "\n");
+                        sbjavaR.append("\t@Query(value =\"select * from " + tableModel.getOwnerName() + "." + tableModel.getTableName() + " where " + indexData.getData() + "= :P1\", nativeQuery = true)\n");
+                        sbjavaR.append("\tList<" + tableModel.getClazzName() + "> findData" + inx + "(@Param(\"P1\") final String param1);\n");
                     }
                     inx++;
                 }
@@ -127,15 +142,12 @@ public class FileRepository {
         }
         List<String> lstjavaRepository = new ArrayList<>();
         lstjavaRepository.add(sbjavaP.toString());
-        lstjavaRepository.add("import org.springframework.stereotype.Repository;\nimport com.paydar.commons.spring.boot.data.repository.BaseRevisionRepository;\n");
-        lstjavaRepository.add("import java.lang.annotation.Native;\nimport java.util.List;\nimport java.util.Optional;\n");
-//        lstjavaRepository.add("import " + __PKGJAVA + "." + tableModel.getClazzName() + ";\n");
-        lstjavaRepository.add("import org.springframework.data.domain.Page;\nimport org.springframework.data.domain.Pageable;\nimport org.springframework.data.jpa.domain.Specification;\nimport org.springframework.data.jpa.repository.Query;\nimport org.springframework.data.jpa.repository.query.Procedure;\nimport org.springframework.data.repository.query.Param;\n");
+        lstjavaRepository.add(sbjavaH.toString());
         lstjavaRepository.add("@Repository");
         lstjavaRepository.add("public interface " + tableModel.getClazzName() + "Repository extends BaseRevisionRepository<" + tableModel.getClazzName() + ", " + tableModel.getPkColumnType().getValue() + "> {\n");
         lstjavaRepository.add(sbjavaR + "\n}\n");
 
-        String dir = Utils.genPath(Constant.argDir, __PKGJAVA);
+        String dir = Utils.genPath(Constant.argDir, __PKGJAVA+ownerPackage);
         Files.write(Paths.get(dir + Constant.fileSep + tableModel.getClazzName() + "Repository.java"), lstjavaRepository);
         lstjavaRepository.clear();
 
