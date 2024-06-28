@@ -24,9 +24,9 @@ public class FileApiListResponse {
     public static void gen(TableModel tableModel, String __PKGJAVAAPI) throws Exception {
         StringBuilder sbjavaResponseHeader = new StringBuilder();
         StringBuilder sbjavaResponse = new StringBuilder();
-        String ownerPackage ="."+tableModel.getOwnerName().toLowerCase();
+        String ownerPackage = "." + tableModel.getOwnerName().toLowerCase();
 
-        sbjavaResponseHeader.append("package " + __PKGJAVAAPI+ownerPackage + "." + tableModel.getClazzName().toLowerCase() + ";\n");
+        sbjavaResponseHeader.append("package " + __PKGJAVAAPI + ownerPackage + "." + tableModel.getClazzName().toLowerCase() + ";\n");
         sbjavaResponseHeader.append("\nimport com.paydar.commons.spring.boot.api.portable.AbstractBasePortable;\n" +
                 "import io.swagger.v3.oas.annotations.extensions.*;\n" +
                 "import io.swagger.v3.oas.annotations.media.*;\n" +
@@ -42,12 +42,13 @@ public class FileApiListResponse {
             for (ColumnData d : tableModel.getLstColData()) {
                 if (!Constant.userFields.contains(d.getColName().toLowerCase())) {
                     if (d.getParent() == 0) {
-                        sbjavaResponse.append("\t@Schema(description = \"\", extensions = {@Extension(name = \"x-uix\", properties = {\n" +
-                                "\t\t  @ExtensionProperty(name = \"order\", value = \"" + inx + "\")\n" +
-                                "\t\t, @ExtensionProperty(name = \"dependant\", value = \"\")\n" +
-                                "\t\t})})\n");
-                        sbjavaResponse.append("\tprivate " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ";\n");
-
+                        if (d.getColLen() <= Constant.MAX_LENGTH_RESPONSE_LIST) {
+                            sbjavaResponse.append("\t@Schema(description = \"\", extensions = {@Extension(name = \"x-uix\", properties = {\n" +
+                                    "\t\t  @ExtensionProperty(name = \"order\", value = \"" + inx + "\")\n" +
+                                    "\t\t, @ExtensionProperty(name = \"dependant\", value = \"\")\n" +
+                                    "\t\t})})\n");
+                            sbjavaResponse.append("\tprivate " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ";\n");
+                        }
                     } else {
                         String mapped = "";
                         TableModel parentTable = Constant.tableInfo.get(d.getParentTableKey());
@@ -60,8 +61,8 @@ public class FileApiListResponse {
                                 "\t\t  @ExtensionProperty(name = \"order\", value = \"" + inx + "\")\n" +
                                 "\t\t, @ExtensionProperty(name = \"dependant\", value = \"\")\n" +
                                 "\t\t})})\n");
-                        sbjavaResponse.append("\tprivate " + parentTable.getClazzName()  + "ParentResponse " + mapped + ";\n");
-                        sbjavaResponseHeader.append("import " + __PKGJAVAAPI +"."+parentTable.getOwnerName().toLowerCase()+ "."+parentTable.getClazzName().toLowerCase()+".*;\n");
+                        sbjavaResponse.append("\tprivate " + parentTable.getClazzName() + "ParentResponse " + mapped + ";\n");
+                        sbjavaResponseHeader.append("import " + __PKGJAVAAPI + "." + parentTable.getOwnerName().toLowerCase() + "." + parentTable.getClazzName().toLowerCase() + ".*;\n");
                     }
                     inx++;
                 }
@@ -72,7 +73,7 @@ public class FileApiListResponse {
         lstjavaResponse.add(sbjavaResponse.toString());
         lstjavaResponse.add("}");
 
-        String dir = Utils.genPath(Constant.argDir, __PKGJAVAAPI+ownerPackage+"."+tableModel.getClazzName().toLowerCase());
+        String dir = Utils.genPath(Constant.argDir, __PKGJAVAAPI + ownerPackage + "." + tableModel.getClazzName().toLowerCase());
         Files.write(Paths.get(dir + "\\" + tableModel.getClazzName() + "ListResponse.java"), lstjavaResponse);
         lstjavaResponse.clear();
 

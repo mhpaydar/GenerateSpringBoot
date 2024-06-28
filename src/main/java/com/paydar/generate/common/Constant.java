@@ -17,12 +17,13 @@ import java.util.stream.Stream;
 public class Constant {
     public static HashMap<String, TableModel> tableInfo = new HashMap<>();
     public static HashMap<String, String> tableCheck = new HashMap<>();
+    public static final int MAX_LENGTH_RESPONSE_LIST = 50;
     public static final String REPLACE_TABLE_PATTERN_START = "^TBL_";
     public static final String REPLACE_FK_PATTERN_START = "^(FK_|Fk_|fK_|fk_)";
     public static final String REPLACE_FK_PATTERN_END = "(_ID|_Id|_iD|_id)$";
     public static final String USER_REG_FIELD = "fk_user_reg_id";
     public static final Set<String> userFields = Stream.of("fk_user_reg_id", "user_reg_date", "fk_user_update_id", "user_update_date").collect(Collectors.toSet());
-    public static final String AUDIT_ENTITY="AbstractAuditEntity";
+    public static final String AUDIT_ENTITY = "AbstractAuditEntity";
 
     public static String argDb = "";
     public static String argDir = "d";

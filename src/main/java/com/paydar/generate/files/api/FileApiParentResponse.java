@@ -41,11 +41,13 @@ public class FileApiParentResponse {
             for (ColumnData d : tableModel.getLstColData()) {
                 if (!Constant.userFields.contains(d.getColName().toLowerCase())) {
                     if (d.getParent() == 0) {
-                        sbjavaResponse.append("\t@Schema(description = \"\", extensions = {@Extension(name = \"x-uix\", properties = {\n" +
-                                "\t\t  @ExtensionProperty(name = \"order\", value = \""+inx+"\")\n" +
-                                "\t\t, @ExtensionProperty(name = \"dependant\", value = \"\")\n" +
-                                "\t\t})})\n");
-                        sbjavaResponse.append("\tprivate " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ";\n");
+                        if (d.getColLen() <= Constant.MAX_LENGTH_RESPONSE_LIST) {
+                            sbjavaResponse.append("\t@Schema(description = \"\", extensions = {@Extension(name = \"x-uix\", properties = {\n" +
+                                    "\t\t  @ExtensionProperty(name = \"order\", value = \"" + inx + "\")\n" +
+                                    "\t\t, @ExtensionProperty(name = \"dependant\", value = \"\")\n" +
+                                    "\t\t})})\n");
+                            sbjavaResponse.append("\tprivate " + d.getColJavaType().getValue() + " " + d.getColNameJava() + ";\n");
+                        }
                     } else {
                         String mapped = "";
                         TableModel parentTable = Constant.tableInfo.get(d.getParentTableKey());
